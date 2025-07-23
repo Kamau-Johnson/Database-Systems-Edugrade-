@@ -1,0 +1,120 @@
+<!-- templates/login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EduGrade | User Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}" />
+</head>
+<body>
+    <div class="container">
+        <h1>EduGrade +</h1>
+        <p class="subtitle">Track. Grade. Grow.</p>
+
+        <h2 id="login-title">Student Login</h2>
+
+        <form id="login-form" method="post" autocomplete="off">
+            
+            <div id="role-toggle-container" class="role-toggle">
+                <input type="radio" id="student-role" name="role" value="student" checked onchange="toggleRole('student')">
+                <label for="student-role">Student</label>
+
+                <input type="radio" id="teacher-role" name="role" value="teacher" onchange="toggleRole('teacher')">
+                <label for="teacher-role">Teacher</label>
+                
+                <div class="role-toggle-pill"></div>
+            </div>
+
+            <!-- Role-Specific Fields -->
+            <div id="student-fields">
+                <label for="admission_number">Admission Number</label>
+                <input type="text" id="admission_number" name="admission_number" placeholder="Enter your admission number" />
+            </div>
+            
+            <div id="teacher-fields" style="display: none;">
+                <label for="access_code">Access Code</label>
+                <input type="text" id="access_code" name="access_code" placeholder="Enter your access code" />
+            </div>
+
+            <!-- Common Field -->
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required placeholder="Enter your password" />
+
+            <button type="submit">Login</button>
+
+            <!-- CHANGE 1: UPDATE THE SIGNUP LINK -->
+            <div class="signup-link">
+                <!-- We removed the href and added an onclick event -->
+                <a href="#" onclick="promptForSignup(event, '{{ url_for('user_signup') }}')">Create an account</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Get all the elements we need to control
+        const loginForm = document.getElementById('login-form');
+        const roleToggleContainer = document.getElementById('role-toggle-container');
+        const loginTitle = document.getElementById('login-title');
+        
+        const studentFields = document.getElementById('student-fields');
+        const teacherFields = document.getElementById('teacher-fields');
+        
+        const studentInput = document.getElementById('admission_number');
+        const teacherInput = document.getElementById('access_code');
+
+        // Get the URLs from Flask
+        const studentActionURL = "{{ student_action_url }}";
+        const teacherActionURL = "{{ teacher_action_url }}";
+
+        function toggleRole(role) {
+            if (role === 'student') {
+                loginForm.action = studentActionURL;
+                loginTitle.textContent = 'Student Login';
+                roleToggleContainer.classList.remove('teacher-active');
+                
+                studentFields.style.display = 'block';
+                teacherFields.style.display = 'none';
+
+                studentInput.required = true;
+                teacherInput.required = false;
+
+            } else { // role is 'teacher'
+                loginForm.action = teacherActionURL;
+                loginTitle.textContent = 'Teacher Login';
+                roleToggleContainer.classList.add('teacher-active');
+
+                studentFields.style.display = 'none';
+                teacherFields.style.display = 'block';
+
+                studentInput.required = false;
+                teacherInput.required = true;
+            }
+        }
+        
+        // CHANGE 2: ADD THE NEW JAVASCRIPT FUNCTION
+        function promptForSignup(event, signupUrl) {
+            // This prevents the link from trying to navigate anywhere by default
+            event.preventDefault(); 
+
+            const code = prompt("Enter passcode to create an account:");
+            
+            // Check if the entered code is correct
+            if (code === "0464") {
+                // If it's correct, go to the signup page
+                window.location.href = signupUrl;
+            } else if (code) { 
+                // If the user entered something, but it was wrong
+                alert("Invalid passcode.");
+            }
+            // If the user clicks "Cancel" (code is null), do nothing.
+        }
+
+
+        // Set the initial state correctly when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleRole('student'); 
+        });
+    </script>
+</body>
+</html>
